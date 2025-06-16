@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom";
+import AssessmentPage from "./AssessmentPage";
+import EvalyDashboard from "./EvalyDashboard";
 
-function App() {
+function AppRouter() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = (event) => {
+      if (event.data?.type === "PAUSE_ASSESSMENT") {
+        const { assess_id } = event.data.payload;
+
+        // Save to localStorage so EvalyDashboard can access it
+        localStorage.setItem("resume_assessment", JSON.stringify({ assess_id }));
+
+        // Navigate to Evaly Dashboard
+        navigate("/evaly-dashboard");
+      }
+    };
+
+    window.addEventListener("message", handler);
+    return () => window.removeEventListener("message", handler);
+  }, [navigate]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/assessment" element={<AssessmentPage />} />
+      <Route path="/evaly-dashboard" element={<EvalyDashboard />} />
+    </Routes>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <Router>
+      <AppRouter />
+    </Router>
+  );
+}
